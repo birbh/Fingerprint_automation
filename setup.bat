@@ -21,6 +21,15 @@ echo [OK] Python found
 REM Install requirements
 echo.
 echo Installing Python requirements...
+
+REM Check if python_backend directory exists
+if not exist "python_backend" (
+    echo [ERROR] python_backend directory not found!
+    echo         Make sure you're running this from the repository root.
+    pause
+    exit /b 1
+)
+
 cd python_backend
 pip install -r requirements.txt
 

@@ -20,6 +20,14 @@ echo "✓ Python 3 found"
 # Install requirements
 echo ""
 echo "Installing Python requirements..."
+
+# Check if python_backend directory exists
+if [ ! -d "python_backend" ]; then
+    echo "❌ Error: python_backend directory not found!"
+    echo "   Make sure you're running this from the repository root."
+    exit 1
+fi
+
 cd python_backend
 pip3 install -r requirements.txt
 

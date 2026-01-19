@@ -179,7 +179,8 @@ class FingerprintApp:
             if system == 'Darwin':  # macOS
                 subprocess.run(['open', image_path], check=False)
             elif system == 'Windows':
-                subprocess.run(['cmd', '/c', 'start', '', image_path], check=False, shell=True)
+                # Use os.startfile on Windows - safer and simpler
+                os.startfile(image_path)
             else:  # Linux and others
                 subprocess.run(['xdg-open', image_path], check=False)
         except Exception as e:
