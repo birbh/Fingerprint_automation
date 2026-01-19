@@ -9,6 +9,8 @@ import json
 import os
 import sys
 import time
+import platform
+import subprocess
 from pathlib import Path
 from datetime import datetime
 import threading
@@ -171,16 +173,15 @@ class FingerprintApp:
     
     def open_image(self, image_path):
         """Open image file using system default viewer"""
-        import platform
         system = platform.system()
         
         try:
             if system == 'Darwin':  # macOS
-                os.system(f'open "{image_path}"')
+                subprocess.run(['open', image_path], check=False)
             elif system == 'Windows':
-                os.system(f'start "" "{image_path}"')
+                subprocess.run(['cmd', '/c', 'start', '', image_path], check=False, shell=True)
             else:  # Linux and others
-                os.system(f'xdg-open "{image_path}"')
+                subprocess.run(['xdg-open', image_path], check=False)
         except Exception as e:
             print(f"  Could not open image: {e}")
     
