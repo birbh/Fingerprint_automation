@@ -1,0 +1,2 @@
+# Python Requirements
+pyserial>=3.5
