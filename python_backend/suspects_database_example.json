@@ -1,0 +1,20 @@
+{
+  "1": {
+    "fingerprint_id": 1,
+    "name": "Example Suspect 1",
+    "age": "28",
+    "description": "Sample suspect data - This is a placeholder entry",
+    "image_path": null,
+    "created_at": "2024-01-15T10:00:00",
+    "last_matched": null
+  },
+  "2": {
+    "fingerprint_id": 2,
+    "name": "Example Suspect 2",
+    "age": "35",
+    "description": "Another sample entry for testing",
+    "image_path": null,
+    "created_at": "2024-01-15T10:30:00",
+    "last_matched": null
+  }
+}
