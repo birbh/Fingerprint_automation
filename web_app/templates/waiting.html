@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crime Lab - Awaiting Match</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 3px;
+        }
+
+        .scanner {
+            width: 200px;
+            height: 200px;
+            margin: 50px auto;
+            border: 5px solid #00ff00;
+            border-radius: 50%;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 20px #00ff00;
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 50px #00ff00;
+                transform: scale(1.05);
+            }
+        }
+
+        .scanner::before {
+            content: "👆";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 80px;
+        }
+
+        .status {
+            font-size: 1.5em;
+            margin-top: 30px;
+            color: #00ff00;
+        }
+
+        .dots {
+            display: inline-block;
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .info {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            border-left: 5px solid #00ff00;
+        }
+
+        .live-indicator {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            background: #00ff00;
+            border-radius: 50%;
+            margin-right: 10px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 CRIME LAB SYSTEM 🔍</h1>
+        
+        <div class="scanner"></div>
+        
+        <div class="status">
+            <span class="live-indicator"></span>
+            <span>System Active - Awaiting Fingerprint Match</span>
+            <span class="dots">...</span>
+        </div>
+
+        <div class="info">
+            <p><strong>Status:</strong> Ready</p>
+            <p><strong>Database:</strong> Connected</p>
+            <p><strong>WebSocket:</strong> <span id="ws-status">Connecting...</span></p>
+            <p style="margin-top: 20px; color: #888;">
+                Place finger on sensor to begin identification
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket connection
+        const socket = io();
+        const wsStatus = document.getElementById('ws-status');
+        
+        socket.on('connect', function() {
+            console.log('WebSocket connected');
+            wsStatus.textContent = 'Connected ✓';
+            wsStatus.style.color = '#00ff00';
+        });
+
+        socket.on('disconnect', function() {
+            console.log('WebSocket disconnected');
+            wsStatus.textContent = 'Disconnected ✗';
+            wsStatus.style.color = '#ff0000';
+        });
+
+        socket.on('new_match', function(data) {
+            console.log('Match detected:', data);
+            // Redirect to suspect dossier
+            window.location.href = '/suspect/' + data.suspect_id;
+        });
+
+        // Animate dots
+        setInterval(() => {
+            const dots = document.querySelector('.dots');
+            if (dots.textContent === '...') {
+                dots.textContent = '.';
+            } else {
+                dots.textContent += '.';
+            }
+        }, 500);
+    </script>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suspect Dossier - {{ suspect.name }}</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background: #c41e3a;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 5px 15px rgba(196, 30, 58, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .alert-banner {
+            background: #ff6b6b;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+            border-left: 5px solid #c41e3a;
+            border-right: 5px solid #c41e3a;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            background: #2d2d2d;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .mugshot-section {
+            text-align: center;
+        }
+
+        .mugshot-frame {
+            border: 5px solid #c41e3a;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(196, 30, 58, 0.4);
+            background: #1e1e1e;
+            padding: 10px;
+        }
+
+        .mugshot-frame img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 5px;
+        }
+
+        .no-image {
+            width: 100%;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1e1e1e;
+            color: #666;
+            font-size: 3em;
+            border-radius: 5px;
+        }
+
+        .confidence-badge {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .confidence-high {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: 3px solid #28a745;
+            box-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+        }
+
+        .confidence-medium {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            border: 3px solid #ffc107;
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+        }
+
+        .confidence-low {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            border: 3px solid #dc3545;
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
+        }
+
+        .details-section {
+            padding: 20px;
+        }
+
+        .detail-block {
+            background: #1e1e1e;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #c41e3a;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+
+        .detail-block h2 {
+            color: #c41e3a;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #c41e3a;
+            padding-bottom: 10px;
+        }
+
+        .detail-row {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .detail-label {
+            color: #888;
+            font-weight: bold;
+            display: inline-block;
+            min-width: 150px;
+        }
+
+        .detail-value {
+            color: #fff;
+            font-size: 1.1em;
+        }
+
+        .charges-list {
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 1.2em;
+            line-height: 1.8;
+        }
+
+        .arrest-history {
+            white-space: pre-line;
+            color: #ddd;
+            line-height: 1.8;
+            font-size: 1em;
+        }
+
+        .aliases {
+            color: #ffc107;
+            font-style: italic;
+            font-size: 1.1em;
+        }
+
+        .timestamp {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            color: #888;
+        }
+
+        .live-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.5);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="live-indicator">● LIVE</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🔴 SUSPECT IDENTIFIED 🔴</h1>
+        </div>
+
+        <div class="alert-banner">
+            ⚠️ FINGERPRINT MATCH CONFIRMED ⚠️
+        </div>
+
+        <div class="main-content">
+            <!-- Mugshot Section -->
+            <div class="mugshot-section">
+                <div class="mugshot-frame">
+                    {% if suspect.mugshot_path %}
+                        <img src="{{ url_for('static', filename=suspect.mugshot_path) }}" 
+                             alt="{{ suspect.name }}" 
+                             onerror="this.parentElement.innerHTML='<div class=\'no-image\'>NO IMAGE</div>'">
+                    {% else %}
+                        <div class="no-image">📷</div>
+                    {% endif %}
+                </div>
+
+                {% if suspect.latest_confidence %}
+                <div class="confidence-badge 
+                    {% if suspect.latest_confidence >= 200 %}confidence-high
+                    {% elif suspect.latest_confidence >= 150 %}confidence-medium
+                    {% else %}confidence-low{% endif %}">
+                    <div>MATCH CONFIDENCE</div>
+                    <div style="font-size: 2em; margin-top: 10px;">
+                        {{ suspect.latest_confidence }}/255
+                    </div>
+                    <div style="font-size: 0.9em; margin-top: 5px;">
+                        ({{ "%.1f"|format((suspect.latest_confidence / 255 * 100)) }}%)
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Details Section -->
+            <div class="details-section">
+                <!-- Suspect Identity -->
+                <div class="detail-block">
+                    <h2>📋 SUSPECT IDENTITY</h2>
+                    <div class="detail-row">
+                        <span class="detail-label">ID Number:</span>
+                        <span class="detail-value">{{ suspect.id }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Full Name:</span>
+                        <span class="detail-value">{{ suspect.name }}</span>
+                    </div>
+                    {% if suspect.aliases %}
+                    <div class="detail-row">
+                        <span class="detail-label">Known Aliases:</span>
+                        <div class="aliases">{{ suspect.aliases }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Criminal Charges -->
+                <div class="detail-block">
+                    <h2>⚖️ CRIMINAL CHARGES</h2>
+                    <div class="charges-list">
+                        {{ suspect.charges or 'No charges listed' }}
+                    </div>
+                    {% if suspect.date_of_crime %}
+                    <div class="detail-row" style="margin-top: 15px;">
+                        <span class="detail-label">Date of Crime:</span>
+                        <span class="detail-value">{{ suspect.date_of_crime.strftime('%B %d, %Y') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Arrest History -->
+                {% if suspect.arrest_history %}
+                <div class="detail-block">
+                    <h2>🚔 ARREST HISTORY</h2>
+                    <div class="arrest-history">{{ suspect.arrest_history }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if suspect.latest_match_time %}
+        <div class="timestamp">
+            <strong>Last Match Detected:</strong> {{ suspect.latest_match_time.strftime('%Y-%m-%d %H:%M:%S') }}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // WebSocket connection for real-time updates
+        const socket = io();
+        
+        socket.on('connect', function() {
+            console.log('WebSocket connected');
+        });
+
+        socket.on('new_match', function(data) {
+            console.log('New match received:', data);
+            
+            // If this is the same suspect, reload the page to show updated confidence
+            const currentSuspectId = {{ suspect.id }};
+            if (data.suspect_id === currentSuspectId) {
+                console.log('Match for current suspect - reloading...');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 500);
+            } else {
+                // Different suspect matched - navigate to their page
+                console.log('Different suspect matched - navigating...');
+                setTimeout(() => {
+                    window.location.href = '/suspect/' + data.suspect_id;
+                }, 500);
+            }
+        });
+
+        socket.on('refresh_dossier', function(data) {
+            console.log('Refresh request received');
+            window.location.reload();
+        });
+
+        // Log when page loaded
+        console.log('Dossier page loaded for Suspect ID: {{ suspect.id }}');
+    </script>
+</body>
+</html>

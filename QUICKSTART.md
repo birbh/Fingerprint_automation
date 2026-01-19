@@ -1,0 +1,94 @@
+# Quick Start Guide
+
+## 🚀 Fast Setup (5 Minutes)
+
+### 1. Install MySQL
+
+**Using XAMPP (Easier):**
+- Download & install XAMPP
+- Open XAMPP Control Panel → Start MySQL
+- Open `http://localhost/phpmyadmin`
+- SQL tab → Paste contents of `database/schema.sql` → Go
+
+**Using Homebrew:**
+```bash
+brew install mysql
+brew services start mysql
+mysql -u root -p < database/schema.sql
+```
+
+### 2. Install Python Packages
+```bash
+pip3 install -r requirements.txt
+```
+
+### 3. Configure
+- Edit `web_app/app.py` → Set MySQL password (empty `''` for XAMPP)
+- Edit `serial_listener.py` → Set Arduino port (check Arduino IDE > Tools > Port)
+
+### 4. Add Suspect Images
+- Place images in `suspects_images/` folder
+- Name: `suspect1.jpg`, `suspect2.jpg`, etc.
+
+### 5. Enroll Fingerprints
+```bash
+# Upload: arduino_sketches/fingerprint_enrollment/fingerprint_enrollment.ino
+# Open Serial Monitor, type ID numbers (1, 2, 3...)
+# Scan each finger twice
+```
+
+### 6. Run System
+```bash
+# Terminal 1: Start web server
+cd web_app
+python3 app.py
+
+# Terminal 2: Start listener
+python3 serial_listener.py
+
+# Upload: arduino_sketches/fingerprint_identification/fingerprint_identification.ino
+# Close Serial Monitor!
+```
+
+### 7. Test
+- Place finger on sensor
+- Browser opens automatically
+- Dossier displays with confidence score
+
+---
+
+## 📋 ID Mapping Log
+
+Keep track of enrolled fingerprints:
+
+```
+ID 1: _____________________ (finger: _______)
+ID 2: _____________________ (finger: _______)
+ID 3: _____________________ (finger: _______)
+ID 4: _____________________ (finger: _______)
+ID 5: _____________________ (finger: _______)
+```
+
+---
+
+## 🔧 Common Issues
+
+**Port Error?**
+```bash
+ls /dev/cu.* # Find your Arduino port
+```
+
+**Database Error?**
+```python
+# In app.py, check:
+DB_CONFIG = {'password': 'YOUR_PASSWORD'}
+```
+
+**Images Not Showing?**
+- Files in `suspects_images/` folder?
+- Named correctly (suspect1.jpg)?
+- Database paths match?
+
+---
+
+See **SETUP_GUIDE.md** for detailed instructions.
