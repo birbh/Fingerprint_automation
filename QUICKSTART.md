@@ -9,12 +9,14 @@
 - Open XAMPP Control Panel → Start MySQL
 - Open `http://localhost/phpmyadmin`
 - SQL tab → Paste contents of `database/schema.sql` → Go
+- Verify `gsr_sessions` table is created (for polygraph data)
 
 **Using Homebrew:**
 ```bash
 brew install mysql
 brew services start mysql
 mysql -u root -p < database/schema.sql
+# Verify: mysql -u root -p -e "USE crime_lab; SHOW TABLES;"
 ```
 
 ### 2. Install Python Packages
@@ -30,30 +32,46 @@ pip3 install -r requirements.txt
 - Place images in `suspects_images/` folder
 - Name: `suspect1.jpg`, `suspect2.jpg`, etc.
 
-### 5. Enroll Fingerprints
+### 5. Wire Sensors to Arduino
+
+**Fingerprint Sensor:**
+- BROWN → 5V
+- ORANGE → GND
+- BLUE → Pin 2
+- WHITE → Pin 3
+
+**GSR Sensor (Galvanic Skin Response / Polygraph):**
+- Signal pin → Arduino A0 (analog input)
+- GND pin → Arduino GND
+- VCC pin → Arduino 5V
+
+### 6. Enroll Fingerprints
 ```bash
 # Upload: arduino_sketches/fingerprint_enrollment/fingerprint_enrollment.ino
 # Open Serial Monitor, type ID numbers (1, 2, 3...)
 # Scan each finger twice
 ```
 
-### 6. Run System
+### 7. Run System
 ```bash
 # Terminal 1: Start web server
 cd web_app
 python3 app.py
 
-# Terminal 2: Start listener
+# Terminal 2: Start serial listener (detects fingerprints + streams GSR)
 python3 serial_listener.py
 
 # Upload: arduino_sketches/fingerprint_identification/fingerprint_identification.ino
 # Close Serial Monitor!
 ```
 
-### 7. Test
+### 8. Test
 - Place finger on sensor
 - Browser opens automatically
-- Dossier displays with confidence score
+- Dossier displays with fingerprint confidence score
+- Live GSR graph updates in real-time with stress detection
+- Graph auto-calibrates baseline from first 10 readings
+- Red color = stress detected, Green = stable
 
 ---
 

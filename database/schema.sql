@@ -119,3 +119,22 @@ INSERT INTO match_history (suspect_id, confidence_score, matched_at) VALUES
 -- WHERE s.id = 1 
 -- ORDER BY mh.matched_at DESC 
 -- LIMIT 1;
+
+-- ============================================
+-- GSR Sessions - Polygraph History
+-- Stores per-session GSR baseline and readings for a suspect
+-- ============================================
+CREATE TABLE IF NOT EXISTS gsr_sessions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    suspect_id INT NOT NULL,
+    baseline INT,
+    peak INT,
+    readings_json LONGTEXT, -- JSON array of readings for the session
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ended_at TIMESTAMP NULL,
+    FOREIGN KEY (suspect_id) REFERENCES suspects(id) ON DELETE CASCADE
+);
+
+-- Optional: add instantaneous GSR value to match_history at match time
+-- Uncomment to enable if desired
+-- ALTER TABLE match_history ADD COLUMN gsr_reading INT;

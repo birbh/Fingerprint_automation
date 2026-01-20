@@ -34,7 +34,17 @@ void setup() {
 
 void loop() {
   getFingerprintID();
-  delay(50); // Short delay to prevent overwhelming the serial port
+  // Stream GSR value every ~500ms
+  static unsigned long lastGsrMillis = 0;
+  unsigned long now = millis();
+  if (now - lastGsrMillis >= 500) {
+    lastGsrMillis = now;
+    int gsr = analogRead(A0);
+    Serial.print("GSR_VAL:");
+    Serial.println(gsr);
+  }
+  
+  delay(20); // Small delay to yield CPU
 }
 
 uint8_t getFingerprintID() {

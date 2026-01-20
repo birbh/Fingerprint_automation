@@ -110,6 +110,16 @@ def parse_arduino_signal(line):
         print(f"✗ Invalid signal format: {line}")
         return None, None
 
+def forward_gsr_value(value):
+    """Forward GSR value to Flask server for WebSocket broadcast"""
+    try:
+        resp = requests.post(f"{FLASK_URL}/api/gsr", json={"value": value}, timeout=2)
+        if resp.status_code != 200:
+            print(f"✗ Failed to send GSR ({resp.status_code})")
+    except requests.exceptions.RequestException as e:
+        # Keep robust: do not crash listener if server temporarily unavailable
+        print(f"✗ GSR forward error: {e}")
+
 # ============================================
 # Main Loop
 # ============================================
@@ -119,6 +129,16 @@ def main():
     print("CRIME LAB - Serial Listener")
     print("Fingerprint Match Detection System")
     print("=" * 60)
+    print()
+    
+    # Open waiting page in browser
+    waiting_url = f"{FLASK_URL}/"
+    print(f"🌐 Opening waiting page in browser: {waiting_url}")
+    try:
+        webbrowser.open(waiting_url)
+        time.sleep(2)  # Give browser time to open
+    except Exception as e:
+        print(f"⚠️  Could not open browser: {e}")
     print()
     
     # Check Flask server
@@ -192,6 +212,15 @@ def main():
                     
                     elif line == "READY":
                         print("  → Arduino sensor initialized")
+                    
+                    # Handle GSR streaming values
+                    elif line.startswith("GSR_VAL:"):
+                        try:
+                            parts = line.split(":")
+                            gsr_val = int(parts[1])
+                            forward_gsr_value(gsr_val)
+                        except Exception:
+                            print(f"✗ Invalid GSR format: {line}")
                 
                 except UnicodeDecodeError:
                     pass  # Ignore decode errors

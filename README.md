@@ -1,14 +1,17 @@
 # 🔍 Crime Lab Fingerprint Automation System
 
-A complete forensic fingerprint identification system that automatically displays criminal dossiers when a match is detected.
+A complete forensic fingerprint identification system that automatically displays criminal dossiers when a match is detected, with integrated live polygraph (GSR) stress detection.
 
 ## 🎯 Features
 
-- **Real-time fingerprint matching** with Arduino sensor
-- **Automatic dossier display** in web browser
-- **WebSocket live updates** for instant refresh
-- **Color-coded confidence scores** (green/yellow/red)
-- **MySQL database** for suspect records and match history
+- **Real-time fingerprint matching** with Arduino fingerprint sensor
+- **Live polygraph (GSR) stress detection** with real-time graph display
+- **Automatic dossier display** in web browser with suspect information
+- **WebSocket live updates** for instant refresh and real-time data streaming
+- **Stress detection visualization** with color-coded indicators (green=stable, red=stress)
+- **Auto-calibrated baseline** from first 10 GSR readings for accuracy
+- **Color-coded confidence scores** for fingerprint matches (green/yellow/red)
+- **MySQL database** for suspect records, match history, and GSR session data
 - **Professional crime lab interface** with mugshots, charges, aliases, and arrest history
 
 ## 📚 Documentation
@@ -19,13 +22,14 @@ A complete forensic fingerprint identification system that automatically display
 ## 🚀 Quick Start
 
 1. Install MySQL and Python dependencies
-2. Run database schema: `mysql -u root -p < database/schema.sql`
+2. Run database schema: `mysql -u root -p < database/schema.sql` (includes gsr_sessions table)
 3. Configure `web_app/app.py` with your MySQL password
-4. Upload Arduino enrollment sketch and scan fingerprints
-5. Start web server: `cd web_app && python3 app.py`
-6. Start serial listener: `python3 serial_listener.py`
-7. Upload identification sketch to Arduino
-8. Place finger on sensor → dossier opens automatically!
+4. Wire fingerprint sensor + GSR sensor to Arduino (see SETUP_GUIDE.md)
+5. Upload Arduino enrollment sketch and scan fingerprints
+6. Start web server: `cd web_app && python3 app.py`
+7. Start serial listener: `python3 serial_listener.py`
+8. Upload identification sketch to Arduino
+9. Place finger on sensor → dossier opens with live GSR graph!
 
 ## 📁 Project Structure
 

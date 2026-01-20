@@ -8,6 +8,7 @@ from flask_socketio import SocketIO, emit
 import mysql.connector
 from datetime import datetime
 import os
+import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'crime_lab_secret_2026'
@@ -169,6 +170,137 @@ def log_match():
         conn.rollback()
         cursor.close()
         conn.close()
+        return jsonify({'error': str(err)}), 500
+
+@app.route('/api/gsr', methods=['POST'])
+def gsr_update():
+    """
+    Receive GSR sensor updates and broadcast to clients.
+    Expected JSON: {"value": <int>}
+    """
+    data = request.get_json() or {}
+    val = data.get('value')
+    try:
+        val = int(val)
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid GSR value'}), 400
+
+    socketio.emit('gsr_update', {
+        'value': val,
+        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    })
+    return jsonify({'success': True})
+
+@app.route('/api/gsr-session/start', methods=['POST'])
+def gsr_session_start():
+    """
+    Start a new GSR session for a suspect.
+    Expected JSON: {"suspect_id": <int>}
+    Returns: {"session_id": <int>}
+    """
+    data = request.get_json() or {}
+    suspect_id = data.get('suspect_id')
+    try:
+        suspect_id = int(suspect_id)
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid suspect_id'}), 400
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'error': 'Database connection failed'}), 500
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            INSERT INTO gsr_sessions (suspect_id) VALUES (%s)
+            """,
+            (suspect_id,)
+        )
+        conn.commit()
+        session_id = cursor.lastrowid
+        cursor.close(); conn.close()
+        return jsonify({'success': True, 'session_id': session_id})
+    except mysql.connector.Error as err:
+        conn.rollback(); cursor.close(); conn.close()
+        return jsonify({'error': str(err)}), 500
+
+@app.route('/api/gsr-session/end', methods=['POST'])
+def gsr_session_end():
+    """
+    End a GSR session and persist baseline/peak/readings.
+    Expected JSON: {"session_id": <int>, "baseline": <int|null>, "readings": [ints]}
+    """
+    data = request.get_json() or {}
+    session_id = data.get('session_id')
+    baseline = data.get('baseline')
+    readings = data.get('readings') or []
+
+    try:
+        session_id = int(session_id)
+    except (TypeError, ValueError):
+        return jsonify({'error': 'Invalid session_id'}), 400
+
+    # Normalize baseline
+    try:
+        baseline = int(baseline) if baseline is not None else None
+    except (TypeError, ValueError):
+        baseline = None
+
+    # Calculate peak if readings provided
+    peak = max(readings) if isinstance(readings, list) and readings else None
+    readings_json = json.dumps(readings) if isinstance(readings, list) else json.dumps([])
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'error': 'Database connection failed'}), 500
+    cursor = conn.cursor()
+    try:
+        cursor.execute(
+            """
+            UPDATE gsr_sessions
+               SET baseline = %s,
+                   peak = %s,
+                   readings_json = %s,
+                   ended_at = CURRENT_TIMESTAMP
+             WHERE id = %s
+            """,
+            (baseline, peak, readings_json, session_id)
+        )
+        conn.commit()
+        cursor.close(); conn.close()
+        return jsonify({'success': True})
+    except mysql.connector.Error as err:
+        conn.rollback(); cursor.close(); conn.close()
+        return jsonify({'error': str(err)}), 500
+
+@app.route('/api/gsr-history/<int:suspect_id>')
+def gsr_history(suspect_id):
+    """Return GSR sessions history for the given suspect."""
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'error': 'Database connection failed'}), 500
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute(
+            """
+            SELECT id, baseline, peak, started_at, ended_at,
+                   readings_json,
+                   JSON_LENGTH(readings_json) AS points
+              FROM gsr_sessions
+             WHERE suspect_id = %s
+             ORDER BY started_at DESC
+            """,
+            (suspect_id,)
+        )
+        sessions = cursor.fetchall() or []
+        # Fallback if JSON_LENGTH unsupported: estimate by commas
+        for s in sessions:
+            if s.get('points') is None and s.get('readings_json'):
+                s['points'] = s['readings_json'].count(',') + 1
+        cursor.close(); conn.close()
+        return jsonify({'success': True, 'sessions': sessions})
+    except mysql.connector.Error as err:
+        cursor.close(); conn.close()
         return jsonify({'error': str(err)}), 500
 
 @app.route('/api/suspects')

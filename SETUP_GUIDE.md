@@ -4,19 +4,22 @@ A complete forensic fingerprint identification system that automatically display
 
 ## 🎯 System Overview
 
-This system consists of three main components:
+This system consists of four main components:
 
-1. **Arduino Fingerprint Sensor** - Captures and matches fingerprints
-2. **Flask Web Server** - Displays criminal dossiers with real-time WebSocket updates
-3. **Python Serial Bridge** - Connects Arduino to the web server
+1. **Arduino Fingerprint Sensor** - Captures and matches fingerprints (returns FOUND_ID with confidence)
+2. **Arduino GSR Sensor** - Measures galvanic skin response for stress detection (streams GSR_VAL every 500ms)
+3. **Flask Web Server** - Displays criminal dossiers with real-time WebSocket updates and live GSR graph
+4. **Python Serial Bridge** - Connects Arduino to web server, forwards fingerprint matches and GSR data
 
 ## 📋 Requirements
 
 ### Hardware
 - Arduino Uno (or compatible)
 - Adafruit Fingerprint Sensor (or compatible)
-- USB cable
-- Mac/PC
+- GSR Sensor (Galvanic Skin Response / Lie Detector module, analog output on A0)
+- USB cable to Arduino
+- Jumper wires for sensor connections
+- Mac/PC with USB ports
 
 ### Software
 - Arduino IDE
@@ -117,13 +120,24 @@ DB_CONFIG = {
 
 ## 📱 Usage
 
+### Phase 0: Wire Both Sensors
+
+**Fingerprint Sensor:**
+- BROWN wire → 5V
+- ORANGE wire → GND
+- BLUE wire → Pin 2
+- WHITE wire → Pin 3
+
+**GSR Sensor:**
+- Signal pin → Arduino A0 (analog input)
+- GND pin → Arduino GND
+- VCC pin → Arduino 5V
+
 ### Phase 1: Enroll Suspects (One-Time Setup)
 
-1. **Wire the Fingerprint Sensor to Arduino:**
-   - BROWN wire → 5V
-   - ORANGE wire → GND
-   - BLUE wire → Pin 2
-   - WHITE wire → Pin 3
+1. **Ensure Both Sensors are Wired (see Phase 0 above)**
+
+2. **Wire the Fingerprint Sensor to Arduino:**
 
 2. **Upload Enrollment Sketch:**
    ```bash
@@ -150,10 +164,13 @@ DB_CONFIG = {
 
 ### Phase 2: Run the System
 
-1. **Upload Identification Sketch:**
+2. **Upload Identification Sketch (with GSR streaming):**
    ```bash
    # Open in Arduino IDE:
    arduino_sketches/fingerprint_identification/fingerprint_identification.ino
+   # This sketch now streams both:
+   #   - FOUND_ID:<id>:<confidence> (on fingerprint match)
+   #   - GSR_VAL:<value> (every 500ms from A0 sensor)
    
    # Upload to Arduino
    # CLOSE the Serial Monitor after uploading!
@@ -205,15 +222,23 @@ DB_CONFIG = {
 
 2. **Place a finger on the sensor**
 
-3. **Watch the magic happen:**
-   - Arduino detects fingerprint
-   - Sends match signal with confidence score
-   - Python logs match to database
-   - Browser automatically opens with full criminal dossier
-   - Dossier displays with color-coded confidence:
+3. **Watch the system in action:**
+   - Arduino detects fingerprint match
+   - Sends `FOUND_ID:<id>:<confidence>` signal
+   - Python serial listener receives and logs to database
+   - Browser automatically opens with criminal dossier
+   - Meanwhile, Arduino streams `GSR_VAL:` readings every 500ms
+   - Live GSR graph appears on dossier page in real-time
+   - Graph auto-calibrates baseline from first 10 readings
+   - Fingerprint confidence color-coded:
      - 🟢 GREEN: High confidence (200+/255)
      - 🟡 YELLOW: Medium confidence (150-199/255)
      - 🔴 RED: Low confidence (<150/255)
+   - GSR graph color-coded for stress:
+     - 🟢 GREEN: Stable (GSR < baseline × 1.3)
+     - 🔴 RED: Stress detected (GSR > baseline × 1.3)
+   - Graph shows last 50 data points, updates in real-time
+   - Y-axis auto-scales for accurate visualization
 
 ## 🎨 Features
 
@@ -228,15 +253,24 @@ DB_CONFIG = {
 - Criminal charges
 - Date of crime
 - Complete arrest history
-- Fingerprint match confidence score
-- Color-coded confidence indicator
-- Timestamp of match
+- Fingerprint match confidence score with color coding
+- **LIVE GSR Polygraph Graph** (NEW):
+  - Real-time stress detection visualization
+  - Last 50 data points displayed
+  - Auto-calibrated baseline (first 10 readings averaged)
+  - Green/red stress indicator
+  - Updates every 500ms from Arduino
+  - Y-axis auto-scales for accuracy
+- Timestamp of fingerprint match
 
 ### Database Tracking
-- All suspects stored in MySQL
-- Match history logged with timestamps
-- Confidence scores recorded
-- Query interface for analysis
+- All suspects stored in MySQL `suspects` table
+- Fingerprint match history in `match_history` table (with timestamps, confidence scores)
+- GSR session data in `gsr_sessions` table (NEW):
+  - Per-session baseline, peak, and readings stored as JSON
+  - Timestamps for session start/end
+  - Linked to suspect by ID
+- Query interface for analysis and historical review
 
 ## 📁 Project Structure
 
@@ -338,22 +372,27 @@ DELETE FROM match_history;
    - Add prisoner number overlay
 
 2. **Prepare Demo Script:**
-   - "This is a forensic fingerprint identification system..."
-   - Show enrollment process
-   - Demonstrate real-time matching
-   - Explain confidence scoring
+   - "This is a forensic fingerprint + polygraph detection system..."
+   - Show enrollment process for both fingerprints
+   - Explain GSR (galvanic skin response) and stress detection
+   - Demonstrate real-time fingerprint matching with live graph
+   - Explain confidence scoring and baseline calibration
+   - Show how stress triggers color change in real-time
 
 3. **Interactive Elements:**
-   - Let judges place their finger
-   - Show the database interface
-   - Explain WebSocket real-time updates
-   - Demonstrate multiple suspects
+   - Let judges place their finger (fingerprint match + GSR reading)
+   - Show the database interface with match history
+   - Explain WebSocket real-time updates and 500ms GSR streaming
+   - Demonstrate multiple suspects with varying stress responses
+   - Show graph auto-scaling and calibration
 
 4. **Visual Aids:**
-   - Print suspect dossiers as posters
-   - Show Arduino wiring diagram
-   - Display system architecture
-   - Include fingerprint science facts
+   - Print suspect dossiers with GSR graph examples
+   - Show Arduino wiring diagram (both fingerprint + GSR sensors)
+   - Display system architecture (Arduino → Serial → Flask → WebSocket → Browser)
+   - Include fingerprint science facts + GSR/polygraph science
+   - Explain baseline calculation (average of first 10 readings)
+   - Show stress threshold formula (baseline × 1.3)
 
 ## 🔐 Security Notes
 

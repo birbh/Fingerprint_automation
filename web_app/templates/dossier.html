@@ -136,6 +136,34 @@
             padding: 20px;
         }
 
+        /* GSR Graph Styles */
+        .gsr-panel {
+            background: #1e1e1e;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #28a745;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+        }
+        .gsr-panel h2 {
+            color: #28a745;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 10px;
+            display: block;
+        }
+        .gsr-chart-container {
+            width: 100%;
+            height: 260px; /* Constrain chart height */
+        }
+        #gsrChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
         .detail-block {
             background: #1e1e1e;
             padding: 20px;
@@ -269,6 +297,16 @@
 
             <!-- Details Section -->
             <div class="details-section">
+                <!-- GSR Live Polygraph Graph -->
+                <div class="gsr-panel">
+                    <h2>🔧 Live Polygraph (GSR)</h2>
+                    <div class="gsr-chart-container">
+                        <canvas id="gsrChart"></canvas>
+                    </div>
+                    <div id="gsrStatus" style="margin-top:8px;color:#888;font-size:0.95em;">
+                        Baseline: calibrating...
+                    </div>
+                </div>
                 <!-- Suspect Identity -->
                 <div class="detail-block">
                     <h2>📋 SUSPECT IDENTITY</h2>
@@ -319,6 +357,7 @@
         {% endif %}
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
         // WebSocket connection for real-time updates
         const socket = io();
@@ -351,8 +390,103 @@
             window.location.reload();
         });
 
+        // --------- GSR Live Chart ---------
+        const suspectId = {{ suspect.id }};
+        const gsrCtx = document.getElementById('gsrChart').getContext('2d');
+        const gsrStatus = document.getElementById('gsrStatus');
+
+        let gsrData = []; // last 50 points
+        let baseline = null; // auto-calibrated from first 10 readings
+        let calibrationBuffer = [];
+        const maxPoints = 50;
+        const thresholdFactor = 1.3; // stress if value > baseline * 1.3
+
+        const gsrChart = new Chart(gsrCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'GSR',
+                    data: [],
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40,167,69,0.15)',
+                    tension: 0,
+                    borderWidth: 2,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                animation: false,
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { display: false },
+                    y: {
+                        beginAtZero: false,
+                        suggestedMin: 0,
+                        suggestedMax: 1024
+                    }
+                },
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+
+        function updateChart(val) {
+            // auto-calibration: average of first 10 readings
+            if (baseline === null) {
+                calibrationBuffer.push(val);
+                gsrStatus.textContent = `Baseline: calibrating (${calibrationBuffer.length}/10)`;
+                if (calibrationBuffer.length >= 10) {
+                    const sum = calibrationBuffer.reduce((a,b)=>a+b,0);
+                    baseline = Math.round(sum / calibrationBuffer.length);
+                    gsrStatus.textContent = `Baseline: ${baseline}`;
+                }
+            }
+
+            gsrData.push(val);
+            if (gsrData.length > maxPoints) gsrData.shift();
+
+            const labels = gsrData.map((_, i) => i + 1);
+            gsrChart.data.labels = labels;
+            gsrChart.data.datasets[0].data = gsrData;
+
+            // dynamic Y bounds for better accuracy
+            const minVal = Math.min(...gsrData);
+            const maxVal = Math.max(...gsrData);
+            const padding = Math.max(5, Math.round((maxVal - minVal) * 0.1));
+            gsrChart.options.scales.y.suggestedMin = Math.max(0, minVal - padding);
+            gsrChart.options.scales.y.suggestedMax = Math.min(1024, maxVal + padding);
+
+            // stress color switch
+            if (baseline !== null && val > baseline * thresholdFactor) {
+                gsrChart.data.datasets[0].borderColor = '#dc3545';
+                gsrChart.data.datasets[0].backgroundColor = 'rgba(220,53,69,0.15)';
+                gsrStatus.textContent = `Baseline: ${baseline} • Stress detected`;
+            } else {
+                gsrChart.data.datasets[0].borderColor = '#28a745';
+                gsrChart.data.datasets[0].backgroundColor = 'rgba(40,167,69,0.15)';
+                if (baseline !== null) {
+                    gsrStatus.textContent = `Baseline: ${baseline} • Stable`;
+                }
+            }
+
+            gsrChart.update();
+        }
+
+        // Removed history/reset for a focused fixed-size live graph
+
+        // Receive GSR updates in real-time
+        socket.on('gsr_update', function(payload) {
+            const val = parseInt(payload.value);
+            if (!Number.isNaN(val)) {
+                updateChart(val);
+            }
+        });
+
         // Log when page loaded
-        console.log('Dossier page loaded for Suspect ID: {{ suspect.id }}');
+        console.log('Dossier page loaded for Suspect ID: ' + suspectId);
     </script>
 </body>
 </html>

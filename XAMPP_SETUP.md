@@ -23,10 +23,13 @@ Quick guide for setting up the Crime Lab system using XAMPP.
 1. Open browser and go to: `http://localhost/phpmyadmin`
 2. Click the **"SQL"** tab at the top
 3. Open `database/schema.sql` file from the project in a text editor
-4. Copy ALL the SQL code
+4. Copy ALL the SQL code (includes suspects, match_history, AND gsr_sessions tables)
 5. Paste it into the SQL query box in phpMyAdmin
 6. Click **"Go"** button at the bottom
-7. ✅ You should see "crime_lab" database appear in the left sidebar
+7. ✅ You should see "crime_lab" database appear in the left sidebar with three tables:
+   - `suspects`
+   - `match_history`
+   - `gsr_sessions` (NEW - for polygraph data)
 
 ### Method 2: Command Line
 
@@ -46,9 +49,10 @@ exit;
 
 In phpMyAdmin:
 1. Click **"crime_lab"** database in left sidebar
-2. You should see two tables:
+2. You should see three tables:
    - `suspects` (5 sample suspects)
-   - `match_history`
+   - `match_history` (fingerprint match logs)
+   - `gsr_sessions` (NEW - polygraph session data)
 
 ## Step 5: Configure Flask App
 
@@ -134,6 +138,19 @@ If you see database errors:
 ✅ Easy to start/stop services
 ✅ Perfect for development and demos
 ✅ Cross-platform (Mac, Windows, Linux)
+✅ Ready for fingerprint + polygraph integration
+
+## New GSR (Polygraph) Feature
+
+The Crime Lab system now includes:
+- **Live stress detection** via GSR sensor on Arduino A0
+- **Real-time graph** displayed on dossier page
+- **Auto-calibrated baseline** from first 10 readings
+- **Stress color coding** (green=stable, red=stress)
+- **Database persistence** in `gsr_sessions` table
+- **500ms update rate** for smooth real-time visualization
+
+No additional XAMPP configuration needed—just ensure the `gsr_sessions` table is created by running the full schema.sql file.
 
 ---
 
