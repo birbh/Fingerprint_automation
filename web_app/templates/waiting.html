@@ -157,6 +157,11 @@
             window.location.href = '/suspect/' + data.suspect_id;
         });
 
+        socket.on('no_match', function(data) {
+            console.log('No match detected, redirecting...');
+            window.location.href = '/no-match';
+        });
+
         // Animate dots
         setInterval(() => {
             const dots = document.querySelector('.dots');

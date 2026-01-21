@@ -83,11 +83,6 @@ def suspect_dossier(suspect_id):
     
     return render_template('dossier.html', suspect=suspect)
 
-@app.route('/no-match')
-def no_match_page():
-    """Display no match page when fingerprint not found"""
-    return render_template('no_match.html')
-
 @app.route('/api/suspect/<int:suspect_id>')
 def get_suspect_data(suspect_id):
     """API endpoint to get suspect data as JSON"""
@@ -176,17 +171,6 @@ def log_match():
         cursor.close()
         conn.close()
         return jsonify({'error': str(err)}), 500
-
-@app.route('/api/no-match', methods=['POST'])
-def no_match_event():
-    """
-    Handle no-match event from serial listener
-    Broadcasts to all connected clients via WebSocket
-    """
-    socketio.emit('no_match', {
-        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    })
-    return jsonify({'success': True})
 
 @app.route('/api/gsr', methods=['POST'])
 def gsr_update():

@@ -120,6 +120,21 @@ def forward_gsr_value(value):
         # Keep robust: do not crash listener if server temporarily unavailable
         print(f"✗ GSR forward error: {e}")
 
+def trigger_no_match():
+    """Trigger no-match event and open no-match page in browser"""
+    try:
+        response = requests.post(f"{FLASK_URL}/api/no-match", json={}, timeout=5)
+        if response.status_code == 200:
+            print(f"✓ No-match event sent to server")
+        
+        no_match_url = f"{FLASK_URL}/no-match"
+        webbrowser.open(no_match_url)
+        print(f"✓ Opening no-match page: {no_match_url}")
+        return True
+    except requests.exceptions.RequestException as e:
+        print(f"✗ Error triggering no-match: {e}")
+        return False
+
 # ============================================
 # Main Loop
 # ============================================
@@ -129,16 +144,6 @@ def main():
     print("CRIME LAB - Serial Listener")
     print("Fingerprint Match Detection System")
     print("=" * 60)
-    print()
-    
-    # Open waiting page in browser
-    waiting_url = f"{FLASK_URL}/"
-    print(f"🌐 Opening waiting page in browser: {waiting_url}")
-    try:
-        webbrowser.open(waiting_url)
-        time.sleep(2)  # Give browser time to open
-    except Exception as e:
-        print(f"⚠️  Could not open browser: {e}")
     print()
     
     # Check Flask server
@@ -208,7 +213,28 @@ def main():
                         print()
                     
                     elif line == "NO_MATCH":
-                        print("  → No match found in database")
+                        # Prevent duplicate triggers within cooldown period
+                        current_time = time.time()
+                        if current_time - last_match_time < cooldown_seconds:
+                            print(f"  (Cooldown active - ignoring)")
+                            continue
+                        
+                        last_match_time = current_time
+                        
+                        print()
+                        print("=" * 60)
+                        print("❌ FINGERPRINT NOT FOUND IN DATABASE ❌")
+                        print("=" * 60)
+                        print()
+                        
+                        # Trigger no-match event and open error page
+                        trigger_no_match()
+                        
+                        print()
+                        print("=" * 60)
+                        print("Waiting for next scan...")
+                        print("=" * 60)
+                        print()
                     
                     elif line == "READY":
                         print("  → Arduino sensor initialized")

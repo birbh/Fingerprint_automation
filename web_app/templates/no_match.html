@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No Match - Crime Lab System</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a0000 0%, #330000 50%, #4d0000 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 900px;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .error-icon {
+            font-size: 120px;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #ff3333;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px rgba(255, 51, 51, 0.8);
+            margin-bottom: 20px;
+            animation: flicker 1.5s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .error-box {
+            background: rgba(0, 0, 0, 0.6);
+            border: 3px solid #ff3333;
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 0 30px rgba(255, 51, 51, 0.5);
+        }
+
+        .error-message {
+            font-size: 1.8em;
+            color: #ff6666;
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .error-details {
+            font-size: 1.2em;
+            color: #cccccc;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .scan-button {
+            background: linear-gradient(135deg, #ff3333 0%, #cc0000 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.5em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(255, 51, 51, 0.4);
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        .scan-button:hover {
+            background: linear-gradient(135deg, #ff6666 0%, #ff3333 100%);
+            box-shadow: 0 8px 30px rgba(255, 51, 51, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .scan-button:active {
+            transform: translateY(0);
+        }
+
+        .database-info {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            border-left: 5px solid #ff3333;
+        }
+
+        .database-info p {
+            color: #999;
+            font-size: 1em;
+            margin: 5px 0;
+        }
+
+        .live-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff3333;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(255, 51, 51, 0.5);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="live-indicator">● SYSTEM ACTIVE</div>
+    
+    <div class="container">
+        <div class="error-icon">⚠️</div>
+        
+        <h1>🔴 ACCESS DENIED 🔴</h1>
+
+        <div class="error-box">
+            <div class="error-message">
+                ERROR: BIOMETRIC DATA NOT FOUND IN DATABASE
+            </div>
+            <div class="error-details">
+                The fingerprint you provided does not match any records in our criminal database system.
+                <br><br>
+                <strong>Status:</strong> Unknown Subject<br>
+                <strong>Action Required:</strong> Re-scan or contact database administrator
+            </div>
+            
+            <button class="scan-button" onclick="scanAgain()">
+                🔍 SCAN AGAIN
+            </button>
+        </div>
+
+        <div class="database-info">
+            <p><strong>Database:</strong> Connected</p>
+            <p><strong>Total Records:</strong> 5 Suspects</p>
+            <p><strong>Last Scan:</strong> <span id="timestamp"></span></p>
+            <p><strong>WebSocket:</strong> <span id="ws-status">Connecting...</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Display current timestamp
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+
+        // WebSocket connection
+        const socket = io();
+        const wsStatus = document.getElementById('ws-status');
+        
+        socket.on('connect', function() {
+            console.log('WebSocket connected');
+            wsStatus.textContent = 'Connected ✓';
+            wsStatus.style.color = '#66ff66';
+        });
+
+        socket.on('disconnect', function() {
+            console.log('WebSocket disconnected');
+            wsStatus.textContent = 'Disconnected ✗';
+            wsStatus.style.color = '#ff6666';
+        });
+
+        // Listen for new match - redirect to dossier
+        socket.on('new_match', function(data) {
+            console.log('Match detected, redirecting to dossier...');
+            window.location.href = '/suspect/' + data.suspect_id;
+        });
+
+        // Listen for another no-match - just refresh page
+        socket.on('no_match', function() {
+            console.log('Another no-match detected, refreshing...');
+            window.location.reload();
+        });
+
+        function scanAgain() {
+            // Redirect back to waiting page
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>
