@@ -46,6 +46,11 @@ A complete forensic fingerprint identification system that automatically display
 └── requirements.txt           # Python dependencies
 ```
 
+Demo:::::
+
+https://github.com/user-attachments/assets/b0b8699c-f369-49b5-bcb0-6223d8319270
+
+
 ## 🎓 Perfect for Science Fairs
 
 Demonstrates:
