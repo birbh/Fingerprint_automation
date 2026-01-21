@@ -49,9 +49,9 @@ INSERT INTO suspects (id, name, mugshot_path, charges, date_of_crime, aliases, a
 2023-07-22: Assault (2 years probation)
 2024-03-15: Armed Robbery (WANTED)');
 
--- Suspect 2: Jane "Spider" Smith
+-- Suspect 2: Theo Ash
 INSERT INTO suspects (id, name, mugshot_path, charges, date_of_crime, aliases, arrest_history) VALUES
-(2, 'Jane "Spider" Smith', 'suspects_images/suspect2.jpg',
+(2, 'Theo Ash', 'suspects_images/suspect2.jpg',
 'Identity Theft, Wire Fraud, Computer Hacking, Money Laundering',
 '2023-11-08',
 'The Spider, J. Smith, Red Jane, Digital Ghost',
