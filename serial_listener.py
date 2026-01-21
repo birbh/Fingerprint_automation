@@ -134,7 +134,17 @@ def trigger_no_match():
     except requests.exceptions.RequestException as e:
         print(f"✗ Error triggering no-match: {e}")
         return False
-
+        
+def open_waiting_page():
+    """Open waiting page in browser"""
+    url = f"{FLASK_URL}"
+    try:
+        webbrowser.open(url)
+        print(f"✓ Opening waiting page in browser: {url}")
+        return True
+    except Exception as e:
+        print(f"✗ Error opening browser: {e}")
+        return False
 # ============================================
 # Main Loop
 # ============================================
@@ -160,6 +170,10 @@ def main():
     print("Press Ctrl+C to stop")
     print("=" * 60)
     print()
+    
+    open_waiting_page()        
+    
+
     
     last_match_time = 0
     cooldown_seconds = 3  # Prevent duplicate triggers
