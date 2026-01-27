@@ -44,7 +44,7 @@ void loop() {
     Serial.println(gsr);
   }
   
-  delay(20); // Small delay to yield CPU
+  delay(1); // Small delay to yield CPU
 }
 
 uint8_t getFingerprintID() {
