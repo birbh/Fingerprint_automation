@@ -286,10 +286,10 @@
                     {% else %}confidence-low{% endif %}">
                     <div>MATCH CONFIDENCE</div>
                     <div style="font-size: 2em; margin-top: 10px;">
-                        223/255
+                        {{ suspect.latest_confidence }}/255
                     </div>
                     <div style="font-size: 0.9em; margin-top: 5px;">
-                        ({{ "%.1f"|format((223 / 255 * 100)) }}%)
+                        ({{ "%.1f"|format((suspect.latest_confidence / 255 * 100)) }}%)
                     </div>
                 </div>
                 {% endif %}
@@ -326,6 +326,28 @@
                     {% endif %}
                 </div>
 
+                 <!-- Criminal Charges -->
+                <div class="detail-block">
+                    <h2>⚖️ CRIMINAL CHARGES</h2>
+                    <div class="charges-list">
+                        {{ suspect.charges or 'No charges listed' }}
+                    </div>
+                    {% if suspect.date_of_crime %}
+                    <div class="detail-row" style="margin-top: 15px;">
+                        <span class="detail-label">Date of Crime:</span>
+                        <span class="detail-value">{{ suspect.date_of_crime.strftime('%B %d, %Y') }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Arrest History -->
+                {% if suspect.arrest_history %}
+                <div class="detail-block">
+                    <h2>🚔 ARREST HISTORY</h2>
+                    <div class="arrest-history">{{ suspect.arrest_history }}</div>
+                </div>
+                {% endif %}
+            </div>
                 
         </div>
 
