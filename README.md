@@ -34,12 +34,13 @@ A complete forensic fingerprint identification system that automatically display
 
 ```
 ├── arduino_sketches/          # Arduino .ino files
+│   ├── Circuit_information/
 │   ├── fingerprint_enrollment/
 │   └── fingerprint_identification/
 ├── web_app/                   # Flask web server
+│   ├── static/suspects_images/         # Mugshot photos
 │   ├── app.py
 │   └── templates/
-├── suspects_images/           # Mugshot photos
 ├── database/                  # MySQL schema
 ├── serial_listener.py         # Arduino-to-web bridge
 └── requirements.txt           # Python dependencies
