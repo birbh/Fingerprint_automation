@@ -1,11 +1,11 @@
-# 🎯 XAMPP Setup Guide for Crime Lab System
+# XAMPP Setup Guide
 
-Quick guide for setting up the Crime Lab system using XAMPP.
+Quick setup for the Crime Lab system using XAMPP.
 
 ## Step 1: Install XAMPP
 
-1. Download XAMPP from [apachefriends.org](https://www.apachefriends.org/)
-2. Install XAMPP (no special options needed)
+1. Download XAMPP 
+2. Install XAMPP 
 3. Open XAMPP Control Panel
 
 ## Step 2: Start MySQL
@@ -14,11 +14,11 @@ Quick guide for setting up the Crime Lab system using XAMPP.
 2. Status should turn green
 3. Port should show: **3306**
 
-**Note:** You don't need to start Apache unless you want to.
+Note: Apache is not required.
 
 ## Step 3: Create Database
 
-### Method 1: phpMyAdmin (GUI - Easier)
+### Method 1: phpMyAdmin
 
 1. Open browser and go to: `http://localhost/phpmyadmin`
 2. Click the **"SQL"** tab at the top
@@ -26,7 +26,7 @@ Quick guide for setting up the Crime Lab system using XAMPP.
 4. Copy ALL the SQL code (includes suspects, match_history, AND gsr_sessions tables)
 5. Paste it into the SQL query box in phpMyAdmin
 6. Click **"Go"** button at the bottom
-7. ✅ You should see "crime_lab" database appear in the left sidebar with three tables:
+7. You should see the "crime_lab" database with these tables:
    - `suspects`
    - `match_history`
    - `gsr_sessions` (NEW - for polygraph data)
@@ -67,7 +67,7 @@ DB_CONFIG = {
 }
 ```
 
-**Your current password:** If you've set password to `'finger'`, keep it that way!
+If you set a password, keep it consistent here.
 
 ## Step 6: Test Connection
 
@@ -76,7 +76,7 @@ cd web_app
 python3 app.py
 ```
 
-If you see this, it's working:
+If you see this, it is working:
 ```
 Crime Lab Web Server Starting...
 Access at: http://localhost:5000
@@ -130,28 +130,9 @@ If you see database errors:
 - Check if "crime_lab" exists in left sidebar
 - If not, run `database/schema.sql` again
 
-## Advantages of XAMPP
+## Notes
 
-✅ Easy GUI control panel
-✅ phpMyAdmin for visual database management  
-✅ No password setup needed (default is empty)
-✅ Easy to start/stop services
-✅ Perfect for development and demos
-✅ Cross-platform (Mac, Windows, Linux)
-✅ Ready for fingerprint + polygraph integration
+- No extra XAMPP settings are needed for the GSR feature.
+- Just make sure `database/schema.sql` is applied.
 
-## New GSR (Polygraph) Feature
-
-The Crime Lab system now includes:
-- **Live stress detection** via GSR sensor on Arduino A0
-- **Real-time graph** displayed on dossier page
-- **Auto-calibrated baseline** from first 10 readings
-- **Stress color coding** (green=stable, red=stress)
-- **Database persistence** in `gsr_sessions` table
-- **500ms update rate** for smooth real-time visualization
-
-No additional XAMPP configuration needed—just ensure the `gsr_sessions` table is created by running the full schema.sql file.
-
----
-
-**Next:** Follow [QUICKSTART.md](QUICKSTART.md) starting from Step 2!
+Next: see [QUICKSTART.md](QUICKSTART.md).

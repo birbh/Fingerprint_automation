@@ -1,14 +1,10 @@
-# 🔌 Circuit Wiring Information
+# Circuit Wiring Information
 
-This document provides detailed wiring instructions for connecting the fingerprint sensor and GSR sensor to your Arduino Uno.
-
-## ⚠️ Important Note
-
-**Circuit connections may vary depending on your specific fingerprint sensor model.** This guide is based on common Adafruit-compatible fingerprint sensors. Always consult your sensor's datasheet for accurate pinout information.
+Basic wiring for a fingerprint sensor and a GSR sensor with Arduino Uno. Pin colors may vary by sensor model. Check your sensor's datasheet.
 
 ---
 
-## 📋 Components Required
+## Components Required
 
 - **Arduino Uno** (or compatible board)
 - **Fingerprint Sensor** (Adafruit-compatible, e.g., AS608, R307, R305, GT-511C3)
@@ -19,9 +15,9 @@ This document provides detailed wiring instructions for connecting the fingerpri
 
 ---
 
-## 🔧 Fingerprint Sensor Wiring
+## Fingerprint Sensor Wiring
 
-### Standard Adafruit-Compatible Sensor (4-wire)
+### Standard 4-wire Sensor
 
 Most Adafruit fingerprint sensors use the following color-coded wires:
 
@@ -60,11 +56,11 @@ If your sensor has different colored wires, refer to its datasheet for pinout. C
 | R307/R305        | Red       | Black      | White  | Green  |
 | GT-511C3         | Red       | Black      | Blue   | White  |
 
-**Note:** Some sensors may operate at 3.3V instead of 5V. Check your datasheet and adjust accordingly.
+Note: some sensors use 3.3V instead of 5V.
 
 ---
 
-## 📊 GSR Sensor Wiring
+## GSR Sensor Wiring
 
 The GSR (Galvanic Skin Response) sensor measures skin conductance for stress/lie detection.
 
@@ -97,7 +93,7 @@ The GSR (Galvanic Skin Response) sensor measures skin conductance for stress/lie
 
 ---
 
-## 🖼️ Visual Wiring Diagram
+## Visual Wiring Diagram
 
 ```
 Arduino Uno
@@ -121,7 +117,7 @@ Arduino Uno
 
 ---
 
-## 🧪 Testing Your Connections
+## Testing Your Connections
 
 ### 1. Test Fingerprint Sensor
 
@@ -158,7 +154,7 @@ If GSR values are stuck at 0 or 1023:
 
 ---
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### Fingerprint Sensor Issues
 
@@ -180,7 +176,7 @@ If GSR values are stuck at 0 or 1023:
 
 ---
 
-## ⚡ Power Considerations
+## Power Considerations
 
 ### USB Power (Recommended for Testing)
 - Arduino USB port provides 500mA
@@ -200,7 +196,7 @@ If GSR values are stuck at 0 or 1023:
 
 ---
 
-## 📖 Advanced Configuration
+## Advanced Configuration
 
 ### Using Different Arduino Pins
 
@@ -230,7 +226,7 @@ Wiring for Mega Serial1:
 
 ---
 
-## 📦 Recommended Components
+## Recommended Components
 
 ### Fingerprint Sensors (Tested Compatible)
 - Adafruit Fingerprint Sensor (Product ID: 751)
@@ -245,7 +241,7 @@ Wiring for Mega Serial1:
 
 ---
 
-## 🔗 Resources
+## Resources
 
 - [Adafruit Fingerprint Sensor Guide](https://learn.adafruit.com/adafruit-optical-fingerprint-sensor)
 - [Arduino SoftwareSerial Library](https://www.arduino.cc/en/Reference/SoftwareSerial)
@@ -254,7 +250,7 @@ Wiring for Mega Serial1:
 
 ---
 
-## ⚠️ Safety Warnings
+## Safety Warnings
 
 1. **Never connect sensors to AC power** - Use only DC 5V
 2. **Check polarity** - Reversed power can damage sensors
@@ -264,7 +260,7 @@ Wiring for Mega Serial1:
 
 ---
 
-## 📝 Notes
+## Notes
 
 - This guide assumes **Arduino Uno** board. Pin assignments may differ for other boards (Mega, Nano, ESP32, etc.)
 - **Sensor compatibility varies** - Always verify with manufacturer documentation
@@ -273,7 +269,7 @@ Wiring for Mega Serial1:
 
 ---
 
-## 🆘 Need Help?
+## Need Help?
 
 If you encounter issues not covered here:
 
@@ -284,5 +280,5 @@ If you encounter issues not covered here:
 
 ---
 
-**Last Updated:** January 2026  
-**Compatible With:** Arduino Uno, Nano, Mega (with pin adjustments)
+Last updated: January 2026
+Compatible with: Arduino Uno, Nano, Mega (with pin adjustments)

@@ -1,22 +1,20 @@
 # Quick Start Guide
 
-## 🚀 Fast Setup (5 Minutes)
+## Fast Setup
 
 ### 1. Install MySQL
 
-**Using XAMPP (Easier):**
-- Download & install XAMPP
-- Open XAMPP Control Panel → Start MySQL
-- Open `http://localhost/phpmyadmin`
-- SQL tab → Paste contents of `database/schema.sql` → Go
-- Verify `gsr_sessions` table is created (for polygraph data)
+XAMPP (easy):
+- Install XAMPP
+- Start MySQL
+- Open http://localhost/phpmyadmin
+- Run database/schema.sql in the SQL tab
 
-**Using Homebrew:**
+Homebrew:
 ```bash
 brew install mysql
 brew services start mysql
 mysql -u root -p < database/schema.sql
-# Verify: mysql -u root -p -e "USE crime_lab; SHOW TABLES;"
 ```
 
 ### 2. Install Python Packages
@@ -25,69 +23,48 @@ pip3 install -r requirements.txt
 ```
 
 ### 3. Configure
-- Edit `web_app/app.py` → Set MySQL password (empty `''` for XAMPP)
-- Edit `serial_listener.py` → Set Arduino port (check Arduino IDE > Tools > Port)
+- Set MySQL password in `web_app/app.py`
+- Set Arduino port in `serial_listener.py`
 
 ### 4. Add Suspect Images
-- Place images in `suspects_images/` folder
-- Name: `suspect1.jpg`, `suspect2.jpg`, etc.
+- Put images in `suspects_images/` as `suspect1.jpg`, `suspect2.jpg`, ...
 
 ### 5. Wire Sensors to Arduino
 
-**Fingerprint Sensor:**
-- BROWN → 5V
-- ORANGE → GND
-- BLUE → Pin 2
-- WHITE → Pin 3
+Fingerprint sensor:
+- RED -> 5V
+- GREEN -> GND
+- YELLOW -> Pin 2
+- BLACK -> Pin 3
 
-**GSR Sensor (Galvanic Skin Response / Polygraph):**
-- Signal pin → Arduino A0 (analog input)
-- GND pin → Arduino GND
-- VCC pin → Arduino 5V
+GSR sensor:
+- Signal -> A0
+- GND -> GND
+- VCC -> 5V
 
 ### 6. Enroll Fingerprints
 ```bash
 # Upload: arduino_sketches/fingerprint_enrollment/fingerprint_enrollment.ino
-# Open Serial Monitor, type ID numbers (1, 2, 3...)
-# Scan each finger twice
+# Open Serial Monitor, enter IDs, scan twice per ID
 ```
 
-### 7. Run System
+### 7. Run
 ```bash
-# Terminal 1: Start web server
+# Terminal 1
 cd web_app
 python3 app.py
 
-# Terminal 2: Start serial listener (detects fingerprints + streams GSR)
+# Terminal 2
 python3 serial_listener.py
 
 # Upload: arduino_sketches/fingerprint_identification/fingerprint_identification.ino
-# Close Serial Monitor!
 ```
 
 ### 8. Test
-- Place finger on sensor
-- Browser opens automatically
-- Dossier displays with fingerprint confidence score
-- Live GSR graph updates in real-time with stress detection
-- Graph auto-calibrates baseline from first 10 readings
-- Red color = stress detected, Green = stable
+- Place a finger on the sensor
+- Dossier opens in the browser
+- GSR graph updates live
 
----
-
-## 📋 ID Mapping Log
-
-Keep track of enrolled fingerprints:
-
-```
-ID 1: _____________________ (finger: _______)
-ID 2: _____________________ (finger: _______)
-ID 3: _____________________ (finger: _______)
-ID 4: _____________________ (finger: _______)
-ID 5: _____________________ (finger: _______)
-```
-
----
 
 ## 🔧 Common Issues
 
@@ -100,6 +77,7 @@ ls /dev/cu.* # Find your Arduino port
 ```python
 # In app.py, check:
 DB_CONFIG = {'password': 'YOUR_PASSWORD'}
+(or leave blank to not use password)
 ```
 
 **Images Not Showing?**

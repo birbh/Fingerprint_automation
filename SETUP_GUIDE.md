@@ -1,27 +1,23 @@
-# 🔍 Crime Lab Fingerprint Automation System
+# Crime Lab Fingerprint Automation System
 
-A complete forensic fingerprint identification system that automatically displays criminal dossiers when the Arduino fingerprint sensor detects a match.
+Fingerprint identification with a web UI and optional GSR sensor input.
 
-## 🎯 System Overview
+## System Overview
 
-This system consists of four main components:
+- Arduino fingerprint sensor sends FOUND_ID and confidence
+- Arduino GSR sensor streams GSR_VAL every 500ms
+- Flask app serves the dossier UI and live graph
+- Python serial listener bridges Arduino to Flask
 
-1. **Arduino Fingerprint Sensor** - Captures and matches fingerprints (returns FOUND_ID with confidence)
-2. **Arduino GSR Sensor** - Measures galvanic skin response for stress detection (streams GSR_VAL every 500ms)
-3. **Flask Web Server** - Displays criminal dossiers with real-time WebSocket updates and live GSR graph
-4. **Python Serial Bridge** - Connects Arduino to web server, forwards fingerprint matches and GSR data
+## Requirements
 
-## 📋 Requirements
+Hardware:
+- Arduino Uno (or other compatible device)
+- Fingerprint sensor (Adafruit-compatible or similar)
+- GSR sensor (analog out to A0)
+- USB cable and jumper wires
 
-### Hardware
-- Arduino Uno (or compatible)
-- Adafruit Fingerprint Sensor (or compatible)
-- GSR Sensor (Galvanic Skin Response / Lie Detector module, analog output on A0)
-- USB cable to Arduino
-- Jumper wires for sensor connections
-- Mac/PC with USB ports
-
-### Software
+Software:
 - Arduino IDE
 - Python 3.8+
 - MySQL Server
@@ -31,7 +27,7 @@ This system consists of four main components:
 
 ### Step 1: Install MySQL
 
-**Option A: XAMPP (Recommended - Easier)**
+Option A: XAMPP (easy)
 
 1. Download XAMPP from [apachefriends.org](https://www.apachefriends.org/)
 2. Install XAMPP
@@ -43,7 +39,7 @@ This system consists of four main components:
    - Password: (empty)
    - Port: `3306`
 
-**Option B: Standalone MySQL (via Homebrew)**
+Option B: Homebrew
 
 ```bash
 # macOS
@@ -66,7 +62,7 @@ pip3 install -r requirements.txt
 
 ### Step 3: Set Up Database
 
-**Option A: Using phpMyAdmin (XAMPP users)**
+Option A: phpMyAdmin
 
 1. Open browser: `http://localhost/phpmyadmin`
 2. Click "SQL" tab at the top
@@ -76,7 +72,7 @@ pip3 install -r requirements.txt
 6. Click "Go" button
 7. You should see "crime_lab" database in the left sidebar
 
-**Option B: Command Line**
+Option B: Command line
 
 ```bash
 # For XAMPP:
@@ -104,12 +100,12 @@ Edit `web_app/app.py` and set your MySQL password:
 DB_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': '',  # <-- Empty for XAMPP, or your password for Homebrew MySQL
+    'password': '',  # leave empty for no pass.
     'database': 'crime_lab'
 }
 ```
 
-**Note:** XAMPP uses an empty password by default. If you set a password in XAMPP, update it here.
+Note: XAMPP uses an empty password by default.
 
 ### Step 5: Prepare Suspect Images
 
@@ -118,28 +114,25 @@ DB_CONFIG = {
 3. Name them: `suspect1.jpg`, `suspect2.jpg`, etc.
 4. Match the ID numbers in your database
 
-## 📱 Usage
+## Usage
 
 ### Phase 0: Wire Both Sensors
 
-**Fingerprint Sensor:**
-- BROWN wire → 5V
-- ORANGE wire → GND
-- BLUE wire → Pin 2
-- WHITE wire → Pin 3
+Fingerprint sensor:
+- RED -> 5V
+- GREEN -> GND
+- YELLOW -> Pin 2
+- BLACK -> Pin 3
 
-**GSR Sensor:**
-- Signal pin → Arduino A0 (analog input)
-- GND pin → Arduino GND
-- VCC pin → Arduino 5V
+GSR sensor:
+- Signal -> A0
+- GND -> GND
+- VCC -> 5V
 
 ### Phase 1: Enroll Suspects (One-Time Setup)
 
-1. **Ensure Both Sensors are Wired (see Phase 0 above)**
-
-2. **Wire the Fingerprint Sensor to Arduino:**
-
-2. **Upload Enrollment Sketch:**
+1. Ensure both sensors are wired.
+2. Upload enrollment sketch:
    ```bash
    # Open in Arduino IDE:
    arduino_sketches/fingerprint_enrollment/fingerprint_enrollment.ino
@@ -147,24 +140,23 @@ DB_CONFIG = {
    # Upload to Arduino
    ```
 
-3. **Enroll Fingerprints:**
+3. Enroll fingerprints:
    - Open Serial Monitor (Tools > Serial Monitor)
    - Set baud rate to 9600
    - Type `1` and press Enter for Suspect ID 1
    - Place finger on sensor twice
    - Repeat for IDs 2, 3, 4, 5, etc.
 
-4. **Keep a Log:**
+4. Keep a log:
    ```
-   ID 1 = John Doe (your thumb)
-   ID 2 = Jane Smith (your index finger)
-   ID 3 = Marcus Rodriguez (assistant's thumb)
+   ID 1 = name1 (your thumb)
+   ID 2 = name2 (your index finger)
    etc.
    ```
 
 ### Phase 2: Run the System
 
-2. **Upload Identification Sketch (with GSR streaming):**
+1. Upload identification sketch (with GSR streaming):
    ```bash
    # Open in Arduino IDE:
    arduino_sketches/fingerprint_identification/fingerprint_identification.ino
@@ -176,7 +168,7 @@ DB_CONFIG = {
    # CLOSE the Serial Monitor after uploading!
    ```
 
-2. **Start Flask Web Server:**
+2. Start Flask Web Server:
    ```bash
    cd web_app
    python3 app.py
@@ -188,18 +180,18 @@ DB_CONFIG = {
    Access at: http://localhost:5000
    ```
 
-3. **Find Your Arduino Port:**
+3. Find your Arduino port:
    - Open Arduino IDE
    - Go to Tools > Port
    - Note the port name (e.g., `/dev/cu.usbmodem1101`)
 
-4. **Configure Serial Listener:**
+4. Configure serial listener:
    Edit `serial_listener.py` and update the port:
    ```python
    ARDUINO_PORT = "/dev/cu.usbmodem1101"  # <-- Change this
    ```
 
-5. **Start Serial Listener:**
+5. Start serial listener:
    ```bash
    # In a new terminal window
    python3 serial_listener.py
@@ -215,14 +207,14 @@ DB_CONFIG = {
 
 ### Phase 3: Demonstration
 
-1. **Open the waiting page** (optional):
+1. Open the waiting page (optional):
    ```
    http://localhost:5000
    ```
 
 2. **Place a finger on the sensor**
 
-3. **Watch the system in action:**
+3. Watch the system in action:
    - Arduino detects fingerprint match
    - Sends `FOUND_ID:<id>:<confidence>` signal
    - Python serial listener receives and logs to database
@@ -240,7 +232,7 @@ DB_CONFIG = {
    - Graph shows last 50 data points, updates in real-time
    - Y-axis auto-scales for accurate visualization
 
-## 🎨 Features
+## Features
 
 ### Real-Time Updates
 - WebSocket connection for instant dossier refresh
@@ -272,75 +264,7 @@ DB_CONFIG = {
   - Linked to suspect by ID
 - Query interface for analysis and historical review
 
-## 📁 Project Structure
-
-```
-Fingerprint_automation/
-├── arduino_sketches/
-│   ├── fingerprint_enrollment/
-│   │   └── fingerprint_enrollment.ino
-│   └── fingerprint_identification/
-│       └── fingerprint_identification.ino
-├── web_app/
-│   ├── app.py
-│   ├── templates/
-│   │   ├── dossier.html
-│   │   └── waiting.html
-│   └── static/
-├── suspects_images/
-│   ├── suspect1.jpg
-│   ├── suspect2.jpg
-│   └── suspect3.jpg
-├── database/
-│   └── schema.sql
-├── serial_listener.py
-├── requirements.txt
-└── README.md
-```
-
-## 🔧 Troubleshooting
-
-### Arduino Not Connecting
-```bash
-# Check available ports
-ls /dev/cu.*
-
-# Try different baud rates (9600, 57600, 115200)
-```
-
-### Flask Server Not Starting
-```bash
-# Check if port 5000 is in use
-lsof -i :5000
-
-# Kill existing process
-kill -9 <PID>
-```
-
-### Database Connection Error
-```bash
-# Verify MySQL is running
-brew services list
-
-# Test connection
-mysql -u root -p -e "SHOW DATABASES;"
-
-# Check password in app.py
-```
-
-### Mugshot Images Not Showing
-- Verify images are in `suspects_images/` folder
-- Check file names match database paths
-- Ensure Flask static folder is configured
-- Use relative paths in database: `suspects_images/suspect1.jpg`
-
-### WebSocket Not Connecting
-- Check browser console for errors
-- Verify Flask-SocketIO is installed
-- Try different browsers
-- Check firewall settings
-
-## 📊 Database Management
+## Database Management
 
 ### View All Suspects
 ```bash
@@ -363,66 +287,7 @@ VALUES (6, 'New Suspect', 'suspects_images/suspect6.jpg', 'Charges here', '2024-
 DELETE FROM match_history;
 ```
 
-## 🎓 Science Fair Tips
+## Notes
 
-1. **Create Professional Mugshots:**
-   - Use consistent lighting
-   - Gray background
-   - Front-facing photos
-   - Add prisoner number overlay
-
-2. **Prepare Demo Script:**
-   - "This is a forensic fingerprint + polygraph detection system..."
-   - Show enrollment process for both fingerprints
-   - Explain GSR (galvanic skin response) and stress detection
-   - Demonstrate real-time fingerprint matching with live graph
-   - Explain confidence scoring and baseline calibration
-   - Show how stress triggers color change in real-time
-
-3. **Interactive Elements:**
-   - Let judges place their finger (fingerprint match + GSR reading)
-   - Show the database interface with match history
-   - Explain WebSocket real-time updates and 500ms GSR streaming
-   - Demonstrate multiple suspects with varying stress responses
-   - Show graph auto-scaling and calibration
-
-4. **Visual Aids:**
-   - Print suspect dossiers with GSR graph examples
-   - Show Arduino wiring diagram (both fingerprint + GSR sensors)
-   - Display system architecture (Arduino → Serial → Flask → WebSocket → Browser)
-   - Include fingerprint science facts + GSR/polygraph science
-   - Explain baseline calculation (average of first 10 readings)
-   - Show stress threshold formula (baseline × 1.3)
-
-## 🔐 Security Notes
-
-**This is a demonstration system for educational purposes.**
-
-- Fingerprint data is stored on the sensor module
-- Database contains sample/fake criminal records
-- Not suitable for real security applications
-- No encryption implemented
-- Use only with consent of participants
-
-## 📝 License
-
-Educational project for science fair demonstration.
-
-## 🤝 Credits
-
-- Adafruit Fingerprint Sensor Library
-- Flask and Flask-SocketIO
-- MySQL Database
-- Arduino Platform
-
-## 📞 Support
-
-For issues or questions:
-1. Check the Troubleshooting section
-2. Verify all wiring connections
-3. Confirm all dependencies are installed
-4. Check that ports are correctly configured
-
----
-
-**Good luck with your science fair! 🏆**
+- Fingerprint wire colors may vary by sensor model.
+- GSR readings are sensitive to contact quality.
