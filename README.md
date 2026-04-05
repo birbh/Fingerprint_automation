@@ -6,6 +6,8 @@ Fingerprint identification with a small web app and optional GSR (stress) sensor
 
 This project is integrated with [online_voting](https://github.com/birbh/Online_voting/). This is the voting system for criminals where users can also state their reason for their vote, enabling interactive user engagement within the crime lab ecosystem.
 
+Also a powerpoint ppt for this scene is also available at link::: [PPtx](https://jumpshare.com/share/hq6UB4P8KTd2Aa3ldhZg)
+
 ## Features
 
 - Fingerprint match detection and logging
