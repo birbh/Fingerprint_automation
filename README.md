@@ -30,24 +30,10 @@ Also a powerpoint ppt for this scene is also available at link::: [PPtx](https:/
 6. Start server: `cd web_app && python3 app.py`
 7. Start listener: `python3 serial_listener.py`
 8. Upload identification sketch.
+      
 
-## Project Structure
 
-```
-├── arduino_sketches/          
-│   ├── Circuit_information/
-│   ├── fingerprint_enrollment/
-│   └── fingerprint_identification/
-├── web_app/                   
-│   ├── static/suspects_images/         
-│   ├── app.py
-│   └── templates/
-├── database/                  
-├── serial_listener.py         
-└── requirements.txt           
-```
-
-Demo:::::
+## Demo:::::
 
 https://github.com/user-attachments/assets/b0b8699c-f369-49b5-bcb0-6223d8319270
 
